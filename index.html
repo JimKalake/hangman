@@ -7,577 +7,14 @@
     <title>TECH HANGMAN</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Bebas+Neue&display=swap"
         rel="stylesheet" />
-    <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        :root {
-            --bg: #080b10;
-            --panel: #0d1117;
-            --panel2: #111620;
-            --border: #1e2535;
-            --border2: #2a3550;
-            --text: #e8edf5;
-            --muted: #4a5570;
-            --muted2: #6a7590;
-            --accent: #00d4ff;
-            --accent2: #0099cc;
-            --danger: #ff3c5a;
-            --danger2: #7a1020;
-            --success: #00ffaa;
-            --warn: #ffd93d;
-            --mono: 'JetBrains Mono', monospace;
-            --display: 'Bebas Neue', sans-serif;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--mono);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem 3rem;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .wrap {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 620px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            padding-bottom: .75rem;
-            border-bottom: 1px solid var(--border2);
-        }
-
-        .logo {
-            font-family: var(--display);
-            font-size: 2.6rem;
-            letter-spacing: .06em;
-            color: var(--accent);
-            line-height: 1;
-        }
-
-        .logo span {
-            color: var(--text);
-            opacity: .4;
-        }
-
-        .tagline {
-            font-size: .6rem;
-            letter-spacing: .2em;
-            color: var(--muted2);
-            text-transform: uppercase;
-            padding-bottom: 4px;
-        }
-
-        .score-bar {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .score-chip {
-            background: var(--panel2);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: .3rem .75rem;
-            font-size: .65rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--muted2);
-        }
-
-        .score-chip b {
-            color: var(--accent);
-            font-size: .9rem;
-            display: block;
-            font-weight: 800;
-        }
-
-        .top-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .cat-row {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            font-size: .62rem;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .cat-badge {
-            background: rgba(0, 212, 255, .08);
-            border: 1px solid rgba(0, 212, 255, .2);
-            color: var(--accent);
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: .62rem;
-            letter-spacing: .15em;
-        }
-
-        .lives-row {
-            display: flex;
-            align-items: center;
-            gap: .6rem;
-            font-size: .62rem;
-            letter-spacing: .15em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .lives-pips {
-            display: flex;
-            gap: 5px;
-        }
-
-        .pip {
-            width: 22px;
-            height: 8px;
-            border-radius: 2px;
-            background: var(--success);
-            transition: all .3s;
-        }
-
-        .pip.lost {
-            background: var(--danger);
-            opacity: .5;
-        }
-
-        .scaffold-wrap {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scaffold-wrap svg {
-            overflow: visible;
-        }
-
-        .body-part {
-            transition: opacity .3s;
-            opacity: 0;
-        }
-
-        .body-part.visible {
-            opacity: 1;
-        }
-
-        .clue-box {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent2);
-            border-radius: 4px;
-            padding: .7rem 1rem;
-            font-size: .78rem;
-            color: var(--muted2);
-            line-height: 1.5;
-        }
-
-        .clue-box strong {
-            color: var(--warn);
-        }
-
-        .word-display {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1.25rem 1rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 4px;
-            justify-content: center;
-            min-height: 84px;
-            align-items: center;
-        }
-
-        .letter-cell {
-            width: 28px;
-            height: 38px;
-            border-bottom: 2px solid var(--border2);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 3px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            font-family: var(--display);
-            letter-spacing: .05em;
-            transition: all .25s;
-        }
-
-        .letter-cell.revealed {
-            color: var(--success);
-            border-color: var(--success);
-        }
-
-        .letter-cell.hinted {
-            color: var(--warn);
-            border-color: var(--warn);
-        }
-
-        .letter-cell.dead {
-            color: var(--danger);
-            border-color: var(--danger);
-        }
-
-        .word-gap {
-            width: 16px;
-        }
-
-        .meta-row {
-            display: flex;
-            gap: 1.2rem;
-            font-size: .62rem;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            color: var(--muted);
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .meta-row span {
-            color: var(--muted2);
-        }
-
-        /* Tally */
-        .tally-panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem 1.25rem;
-        }
-
-        .tally-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: .6rem;
-        }
-
-        .tally-title {
-            font-size: .6rem;
-            letter-spacing: .2em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .tally-count {
-            font-size: .6rem;
-            letter-spacing: .1em;
-            color: var(--muted2);
-        }
-
-        .tally-rows {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .tally-rows::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .tally-rows::-webkit-scrollbar-thumb {
-            background: var(--border2);
-            border-radius: 2px;
-        }
-
-        .tally-entry {
-            display: grid;
-            grid-template-columns: 24px 1fr auto 20px;
-            align-items: center;
-            gap: 10px;
-            padding: 5px 10px;
-            background: var(--panel2);
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            font-size: .72rem;
-            animation: slideIn .2s ease;
-        }
-
-        .tally-num {
-            color: var(--muted);
-            font-size: .6rem;
-            text-align: right;
-        }
-
-        .tally-word {
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            font-weight: 700;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .tally-word.correct-g {
-            color: var(--success);
-        }
-
-        .tally-word.wrong-g {
-            color: var(--danger);
-            opacity: .7;
-        }
-
-        .tally-marks {
-            font-family: monospace;
-            font-size: .8rem;
-            color: var(--muted2);
-            letter-spacing: .06em;
-            text-align: right;
-        }
-
-        .tally-icon {
-            font-size: .85rem;
-            text-align: center;
-        }
-
-        .tally-empty {
-            font-size: .68rem;
-            color: var(--muted);
-            font-style: italic;
-            padding: .5rem 0;
-            text-align: center;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-4px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Input */
-        .input-area {
-            display: flex;
-            gap: 8px;
-        }
-
-        .guess-input {
-            flex: 1;
-            background: var(--panel2);
-            border: 1px solid var(--border2);
-            border-radius: 6px;
-            color: var(--text);
-            font-family: var(--mono);
-            font-size: .9rem;
-            font-weight: 700;
-            letter-spacing: .15em;
-            padding: .65rem 1rem;
-            text-transform: uppercase;
-            outline: none;
-            transition: border-color .15s, box-shadow .15s;
-        }
-
-        .guess-input::placeholder {
-            color: var(--muted);
-            font-weight: 400;
-            letter-spacing: .05em;
-            text-transform: none;
-        }
-
-        .guess-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(0, 212, 255, .12);
-        }
-
-        .guess-input:disabled {
-            opacity: .3;
-        }
-
-        .guess-input.shake {
-            animation: shake .35s ease;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            20% {
-                transform: translateX(-6px);
-            }
-
-            40% {
-                transform: translateX(6px);
-            }
-
-            60% {
-                transform: translateX(-4px);
-            }
-
-            80% {
-                transform: translateX(4px);
-            }
-        }
-
-        .submit-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 6px;
-            font-family: var(--mono);
-            font-size: .75rem;
-            font-weight: 800;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-            padding: .65rem 1.25rem;
-            cursor: pointer;
-            transition: background .15s, transform .1s;
-            white-space: nowrap;
-        }
-
-        .submit-btn:hover:not(:disabled) {
-            background: #33ddff;
-            transform: translateY(-1px);
-        }
-
-        .submit-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .submit-btn:disabled {
-            opacity: .3;
-            cursor: default;
-        }
-
-        .status-box {
-            border-radius: 6px;
-            padding: .7rem 1rem;
-            font-size: .8rem;
-            font-weight: 700;
-            letter-spacing: .08em;
-            text-align: center;
-            display: none;
-        }
-
-        .status-box.visible {
-            display: block;
-        }
-
-        .status-box.won {
-            background: rgba(0, 255, 170, .08);
-            border: 1px solid rgba(0, 255, 170, .3);
-            color: var(--success);
-        }
-
-        .status-box.lost {
-            background: rgba(255, 60, 90, .08);
-            border: 1px solid rgba(255, 60, 90, .3);
-            color: var(--danger);
-        }
-
-        .status-box small {
-            display: block;
-            font-size: .65rem;
-            font-weight: 400;
-            opacity: .8;
-            margin-top: 3px;
-            letter-spacing: .12em;
-            text-transform: uppercase;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 8px;
-        }
-
-        .new-btn {
-            flex: 1;
-            background: transparent;
-            border: 1px solid var(--border2);
-            color: var(--muted2);
-            font-family: var(--mono);
-            font-size: .68rem;
-            font-weight: 700;
-            letter-spacing: .15em;
-            text-transform: uppercase;
-            padding: .6rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all .15s;
-        }
-
-        .new-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .hint-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            font-family: var(--mono);
-            font-size: .68rem;
-            font-weight: 700;
-            letter-spacing: .15em;
-            text-transform: uppercase;
-            padding: .6rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all .15s;
-            white-space: nowrap;
-        }
-
-        .hint-btn:hover:not(:disabled) {
-            border-color: var(--warn);
-            color: var(--warn);
-        }
-
-        .hint-btn:disabled {
-            opacity: .25;
-            cursor: default;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+
     <div class="wrap">
 
+        <!-- Header -->
         <div class="header">
             <div>
                 <div class="logo">TECH<span>.</span>HANG</div>
@@ -589,21 +26,27 @@
             </div>
         </div>
 
+        <!-- Category + Lives -->
         <div class="top-row">
-            <div class="cat-row">Category <div class="cat-badge" id="cat-label">—</div>
+            <div class="cat-row">
+                Category <div class="cat-badge" id="cat-label">—</div>
             </div>
-            <div class="lives-row">Lives <div class="lives-pips" id="pips"></div>
+            <div class="lives-row">
+                Lives <div class="lives-pips" id="pips"></div>
             </div>
         </div>
 
+        <!-- Hangman illustration -->
         <div class="scaffold-wrap">
             <svg id="gallows" viewBox="0 0 260 200" width="260" height="200" fill="none"
                 xmlns="http://www.w3.org/2000/svg">
+                <!-- Static scaffold -->
                 <line x1="20" y1="192" x2="240" y2="192" stroke="#2a3550" stroke-width="3" stroke-linecap="round" />
                 <line x1="65" y1="192" x2="65" y2="8" stroke="#2a3550" stroke-width="3" stroke-linecap="round" />
                 <line x1="65" y1="8" x2="160" y2="8" stroke="#2a3550" stroke-width="3" stroke-linecap="round" />
                 <line x1="160" y1="8" x2="160" y2="36" stroke="#2a3550" stroke-width="3" stroke-linecap="round" />
                 <line x1="65" y1="30" x2="95" y2="8" stroke="#1e2535" stroke-width="2" stroke-linecap="round" />
+                <!-- Body parts (revealed progressively via JS) -->
                 <circle id="p-head" class="body-part" cx="160" cy="54" r="18" stroke="#ff3c5a" stroke-width="2.5" />
                 <g id="p-face" class="body-part">
                     <circle cx="154" cy="51" r="2" fill="#ff3c5a" />
@@ -621,6 +64,7 @@
                     stroke-width="2.5" stroke-linecap="round" />
                 <line id="p-rleg" class="body-part" x1="160" y1="122" x2="182" y2="152" stroke="#ff3c5a"
                     stroke-width="2.5" stroke-linecap="round" />
+                <!-- Death state: X eyes (shown on loss) -->
                 <g id="p-dead" class="body-part">
                     <line x1="151" y1="48" x2="157" y2="54" stroke="#ff3c5a" stroke-width="2.2"
                         stroke-linecap="round" />
@@ -634,16 +78,20 @@
             </svg>
         </div>
 
+        <!-- Clue -->
         <div class="clue-box" id="clue-box"><strong>CLUE</strong> —</div>
 
+        <!-- Word display -->
         <div class="word-display" id="word-display"></div>
 
+        <!-- Meta info -->
         <div class="meta-row">
             <div>Letters: <span id="meta-len">—</span></div>
             <div id="meta-words-wrap">Words: <span id="meta-words">—</span></div>
             <div>Guesses left: <span id="meta-rem">—</span></div>
         </div>
 
+        <!-- Attempt log / tally -->
         <div class="tally-panel">
             <div class="tally-header">
                 <div class="tally-title">▌ Attempt log</div>
@@ -654,269 +102,25 @@
             </div>
         </div>
 
+        <!-- Input -->
         <div class="input-area">
             <input class="guess-input" id="guess-input" type="text" placeholder="Type your full guess and press Enter…"
                 autocomplete="off" spellcheck="false" />
             <button class="submit-btn" id="submit-btn" onclick="submitGuess()">Guess →</button>
         </div>
 
+        <!-- Win / loss status -->
         <div class="status-box" id="status-box"></div>
 
+        <!-- Action buttons -->
         <div class="btn-row">
             <button class="hint-btn" id="hint-btn" onclick="useHint()">💡 Hint — reveal a letter (costs 1 life)</button>
             <button class="new-btn" onclick="newGame()">↺ New word</button>
         </div>
 
     </div>
-    <script>
-        const WORDS = [
-            { w: "JAVASCRIPT", c: "Language", clue: "The scripting language that runs natively in every browser on earth" },
-            { w: "TYPESCRIPT", c: "Language", clue: "Microsoft's statically-typed superset of JavaScript" },
-            { w: "PYTHON", c: "Language", clue: "Named after Monty Python — not the snake" },
-            { w: "RUST", c: "Language", clue: "Mozilla-born systems language famous for memory safety without a GC" },
-            { w: "KOTLIN", c: "Language", clue: "JetBrains' modern JVM language, now Google's preferred Android language" },
-            { w: "GOLANG", c: "Language", clue: "Compiled, concurrent language from Google with a friendly gopher mascot" },
-            { w: "SWIFT", c: "Language", clue: "Apple's language that replaced Objective-C for iOS development" },
-            { w: "ELIXIR", c: "Language", clue: "Functional language on the Erlang VM, beloved for real-time distributed apps" },
-            { w: "WEBASSEMBLY", c: "Language", clue: "Binary instruction format that lets C, Rust, and more run in the browser" },
-            { w: "REACT", c: "Framework", clue: "Facebook's component-based UI library using a virtual DOM" },
-            { w: "NEXTJS", c: "Framework", clue: "Vercel's React meta-framework with file-based routing and built-in SSR" },
-            { w: "SVELTE", c: "Framework", clue: "Compiler-based frontend framework — no virtual DOM, ships to vanilla JS" },
-            { w: "FASTAPI", c: "Framework", clue: "Python web framework that auto-generates OpenAPI docs from type hints" },
-            { w: "KUBERNETES", c: "Platform", clue: "Greek for 'helmsman' — the dominant container orchestration system" },
-            { w: "TERRAFORM", c: "DevOps", clue: "HashiCorp's infrastructure-as-code tool using a declarative HCL syntax" },
-            { w: "GRAPHQL", c: "API", clue: "Facebook's query language — clients request exactly the shape of data they need" },
-            { w: "RECURSION", c: "Concept", clue: "A function that solves a problem by calling itself — see: this clue" },
-            { w: "POLYMORPHISM", c: "Concept", clue: "OOP principle: one interface, many different underlying implementations" },
-            { w: "IDEMPOTENT", c: "Concept", clue: "An operation that yields the same result no matter how many times you run it" },
-            { w: "DEADLOCK", c: "Concept", clue: "Two threads each waiting for the other to release a lock — forever" },
-            { w: "MEMOIZATION", c: "Concept", clue: "Caching a function's return value keyed by its inputs to avoid repeat work" },
-            { w: "MONOREPO", c: "Concept", clue: "Storing multiple distinct projects in a single version-controlled repository" },
-            { w: "MICROSERVICES", c: "Architecture", clue: "Breaking a large app into small, independently deployable services" },
-            { w: "SERVERLESS", c: "Architecture", clue: "Cloud model where you deploy functions, not servers" },
-            { w: "WEBHOOK", c: "API", clue: "HTTP callback — one service pinging another when an event occurs" },
-            { w: "MIDDLEWARE", c: "Concept", clue: "Code layer sitting between request and response in a web framework" },
-            { w: "WEBSOCKET", c: "Protocol", clue: "Full-duplex communication channel over a single TCP connection" },
-            { w: "OAUTH", c: "Protocol", clue: "Open standard for token-based access delegation — powers 'Login with Google'" },
-            { w: "POSTGRESQL", c: "Database", clue: "Advanced open-source relational database, often called the most feature-rich RDBMS" },
-            { w: "ELASTICSEARCH", c: "Database", clue: "Distributed search and analytics engine built on Apache Lucene" },
-            { w: "REDIS", c: "Database", clue: "In-memory data structure store used as cache, message broker, and database" },
-            { w: "DOCKER", c: "DevOps", clue: "Platform that packages apps and their dependencies into portable containers" },
-            { w: "NGINX", c: "Server", clue: "High-performance web server and reverse proxy — pronounced 'engine-x'" },
-            { w: "CLOUDFLARE", c: "Network", clue: "CDN and DDoS protection layer sitting in front of millions of websites" },
-            { w: "TRANSFORMER", c: "AI/ML", clue: "The neural architecture behind GPT, BERT, and virtually all modern LLMs" },
-            { w: "FINE TUNING", c: "AI/ML", clue: "Adapting a pre-trained model on a smaller, task-specific dataset" },
-            { w: "TOKENIZATION", c: "AI/ML", clue: "Breaking raw text into sub-word units before feeding it to a language model" },
-            { w: "EMBEDDINGS", c: "AI/ML", clue: "Dense vector representations of text used for semantic search and similarity" },
-            { w: "BACKPROPAGATION", c: "AI/ML", clue: "Algorithm that propagates error gradients backward to train neural networks" },
-            { w: "SQL INJECTION", c: "Security", clue: "Attack that manipulates a query by sneaking malicious SQL into user input" },
-            { w: "ZERO DAY", c: "Security", clue: "A vulnerability exploited in the wild before the vendor even knows it exists" },
-            { w: "JWT", c: "Security", clue: "Compact, URL-safe token format for transmitting claims between parties" },
-            { w: "RATE LIMITING", c: "Security", clue: "Throttling how many requests a client can make in a given time window" },
-            { w: "CONTINUOUS INTEGRATION", c: "DevOps", clue: "Practice of automatically building and testing code every time a developer pushes" },
-            { w: "LOAD BALANCER", c: "Infrastructure", clue: "Distributes incoming traffic across multiple backend servers" },
-            { w: "API GATEWAY", c: "Infrastructure", clue: "Single entry point that routes, authenticates, and rate-limits API calls" },
-            { w: "RACE CONDITION", c: "Concept", clue: "Bug that occurs when two threads access shared state in an unexpected order" },
-            { w: "DEPENDENCY INJECTION", c: "Concept", clue: "Design pattern where a class receives its dependencies rather than creating them" },
-            { w: "BINARY SEARCH", c: "Algorithm", clue: "O(log n) search that halves the remaining range on each step" },
-            { w: "HASH TABLE", c: "Data Structure", clue: "Data structure that maps keys to values using a hash function for O(1) lookups" },
-        ];
 
-        const MAX_WRONG = 6;
-        let word = "", clue = "", cat = "";
-        let guesses = [], revealedPositions = new Set(), wrongCount = 0, gameOver = false, hintsLeft = 2;
-        let wins = 0, losses = 0;
-
-        function newGame() {
-            const pick = WORDS[Math.floor(Math.random() * WORDS.length)];
-            word = pick.w.toUpperCase(); clue = pick.clue; cat = pick.c;
-            guesses = []; revealedPositions = new Set(); wrongCount = 0; gameOver = false; hintsLeft = 2;
-            document.getElementById("cat-label").textContent = cat;
-            document.getElementById("clue-box").innerHTML = `<strong>CLUE</strong> — ${clue}`;
-            const wordParts = word.trim().split(" ");
-            document.getElementById("meta-len").textContent = word.replace(/ /g, "").length;
-            const mw = document.getElementById("meta-words-wrap");
-            if (wordParts.length > 1) { mw.style.display = ""; document.getElementById("meta-words").textContent = wordParts.length; }
-            else { mw.style.display = "none"; }
-            document.getElementById("meta-rem").textContent = MAX_WRONG;
-            document.getElementById("guess-input").value = "";
-            document.getElementById("guess-input").disabled = false;
-            document.getElementById("submit-btn").disabled = false;
-            document.getElementById("hint-btn").disabled = false;
-            document.getElementById("hint-btn").textContent = `💡 Hint — reveal a letter (${hintsLeft} left, costs 1 life)`;
-            const sb = document.getElementById("status-box"); sb.className = "status-box"; sb.innerHTML = "";
-            document.getElementById("tally-rows").innerHTML = '<div class="tally-empty">No guesses yet — type your first attempt below</div>';
-            document.getElementById("tally-count").textContent = "0 attempts";
-            renderWord(false, false); renderPips(); renderGallows(false);
-        }
-
-        function renderWord(won, dead) {
-            const container = document.getElementById("word-display"); container.innerHTML = "";
-            word.split("").forEach((ch, i) => {
-                if (ch === " ") { const sp = document.createElement("div"); sp.className = "word-gap"; container.appendChild(sp); return; }
-                const cell = document.createElement("div"); cell.className = "letter-cell";
-                const isRevealed = revealedPositions.has(i);
-                if (won || dead || isRevealed) {
-                    cell.textContent = ch;
-                    if (dead && !isRevealed) cell.classList.add("dead");
-                    else if (revealedPositions.has(i) && !won) {
-                        // check if it was from a hint
-                        if (hintedPositions.has(i)) cell.classList.add("hinted");
-                        else cell.classList.add("revealed");
-                    }
-                    else cell.classList.add("revealed");
-                }
-                container.appendChild(cell);
-            });
-        }
-
-        const hintedPositions = new Set();
-
-        function newGame_reset_hints() { hintedPositions.clear(); }
-
-        // Override newGame to also clear hintedPositions
-        const _origNew = newGame;
-        window.newGame = function () { hintedPositions.clear(); _origNew(); };
-
-        function addRevealedFromGuess(guess) {
-            // Reveal letters that match position-for-position
-            for (let i = 0; i < Math.min(guess.length, word.length); i++) {
-                if (guess[i] === word[i]) revealedPositions.add(i);
-            }
-        }
-
-        // Tally mark renderer (proper tally groups)
-        function tallyMark(n) {
-            if (n === 0) return "—";
-            let s = "";
-            const full = Math.floor(n / 5);
-            const rem = n % 5;
-            // Use pipe chars for tally
-            for (let i = 0; i < full; i++) s += "||||̶ ";
-            const singles = "|".repeat(rem);
-            if (singles) s += singles;
-            return s.trim();
-        }
-
-        function addTallyEntry(guess, isCorrect) {
-            const rows = document.getElementById("tally-rows");
-            rows.querySelectorAll(".tally-empty").forEach(e => e.remove());
-            const n = guesses.length;
-            const entry = document.createElement("div"); entry.className = "tally-entry";
-            entry.innerHTML = `
-    <span class="tally-num">${n}</span>
-    <span class="tally-word ${isCorrect ? "correct-g" : "wrong-g"}">${guess}</span>
-    <span class="tally-marks">${tallyMark(n)}</span>
-    <span class="tally-icon">${isCorrect ? "✓" : "✗"}</span>
-  `;
-            rows.appendChild(entry); rows.scrollTop = rows.scrollHeight;
-            document.getElementById("tally-count").textContent = `${n} attempt${n !== 1 ? "s" : ""}`;
-        }
-
-        function submitGuess() {
-            if (gameOver) return;
-            const input = document.getElementById("guess-input");
-            const raw = input.value.trim().toUpperCase();
-            if (!raw) { shakeInput(); return; }
-            if (guesses.includes(raw)) { shakeInput(); input.value = ""; return; }
-            guesses.push(raw);
-            const correct = raw === word;
-            addTallyEntry(raw, correct);
-            input.value = "";
-            if (correct) {
-                // reveal all
-                word.split("").forEach((_, i) => revealedPositions.add(i));
-                renderWord(true, false);
-                gameOver = true; wins++;
-                document.getElementById("s-wins").textContent = wins;
-                const sb = document.getElementById("status-box");
-                sb.className = "status-box won visible";
-                sb.innerHTML = `ACCESS GRANTED — Correct!<small>Solved in ${guesses.length} attempt${guesses.length !== 1 ? "s" : ""}</small>`;
-                document.getElementById("guess-input").disabled = true;
-                document.getElementById("submit-btn").disabled = true;
-                document.getElementById("hint-btn").disabled = true;
-            } else {
-                wrongCount++;
-                addRevealedFromGuess(raw);
-                renderWord(false, false);
-                renderPips();
-                if (wrongCount >= MAX_WRONG) {
-                    gameOver = true; losses++;
-                    document.getElementById("s-losses").textContent = losses;
-                    renderWord(false, true);
-                    renderGallows(true);
-                    const sb = document.getElementById("status-box");
-                    sb.className = "status-box lost visible";
-                    sb.innerHTML = `SYSTEM FAILURE — The answer was <strong>${word}</strong><small>Out of lives</small>`;
-                    document.getElementById("guess-input").disabled = true;
-                    document.getElementById("submit-btn").disabled = true;
-                    document.getElementById("hint-btn").disabled = true;
-                }
-            }
-        }
-
-        function useHint() {
-            if (gameOver || hintsLeft <= 0) return;
-            const hidden = [];
-            word.split("").forEach((ch, i) => { if (ch !== " " && !revealedPositions.has(i)) hidden.push(i); });
-            if (!hidden.length) return;
-            const pick = hidden[Math.floor(Math.random() * hidden.length)];
-            revealedPositions.add(pick); hintedPositions.add(pick);
-            wrongCount++; hintsLeft--;
-            renderWord(false, false); renderPips();
-            document.getElementById("hint-btn").textContent = `💡 Hint — reveal a letter (${hintsLeft} left, costs 1 life)`;
-            if (hintsLeft <= 0) document.getElementById("hint-btn").disabled = true;
-            if (wrongCount >= MAX_WRONG) {
-                gameOver = true; losses++;
-                document.getElementById("s-losses").textContent = losses;
-                renderWord(false, true);
-                renderGallows(true);
-                const sb = document.getElementById("status-box");
-                sb.className = "status-box lost visible";
-                sb.innerHTML = `SYSTEM FAILURE — The answer was <strong>${word}</strong><small>Ran out of lives using hints</small>`;
-                document.getElementById("guess-input").disabled = true;
-                document.getElementById("submit-btn").disabled = true;
-                document.getElementById("hint-btn").disabled = true;
-            }
-        }
-
-        const PARTS = ["p-head", "p-face", "p-body", "p-larm", "p-rarm", "p-lleg", "p-rleg"];
-
-        function renderGallows(dead) {
-            PARTS.forEach((id, i) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (id === "p-dead") {
-                    el.classList.toggle("visible", dead === true);
-                } else {
-                    el.classList.toggle("visible", i < wrongCount);
-                }
-            });
-            // hide smile on death, show X eyes
-            const face = document.getElementById("p-face");
-            const deadEl = document.getElementById("p-dead");
-            if (dead) { face.classList.remove("visible"); deadEl.classList.add("visible"); }
-        }
-
-        function renderPips() {
-            const pips = document.getElementById("pips"); pips.innerHTML = "";
-            for (let i = 0; i < MAX_WRONG; i++) {
-                const p = document.createElement("div"); p.className = "pip" + (i < wrongCount ? " lost" : ""); pips.appendChild(p);
-            }
-            document.getElementById("meta-rem").textContent = Math.max(0, MAX_WRONG - wrongCount);
-            renderGallows(false);
-        }
-
-        function shakeInput() {
-            const inp = document.getElementById("guess-input");
-            inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake");
-            setTimeout(() => inp.classList.remove("shake"), 400);
-        }
-
-        document.getElementById("guess-input").addEventListener("keydown", e => { if (e.key === "Enter") submitGuess(); });
-
-        newGame();
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
